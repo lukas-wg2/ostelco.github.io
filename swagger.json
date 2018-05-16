@@ -1,0 +1,222 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "The client API for Panacea.",
+    "version" : "1.0.0",
+    "title" : "Ostelco API"
+  },
+  "host" : "api.ostelco.org",
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/profile" : {
+      "get" : {
+        "description" : "Get profile for the user (email-id present in the bearer token).",
+        "operationId" : "getProfile",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Get the profile for this user.",
+            "schema" : {
+              "$ref" : "#/definitions/Profile"
+            }
+          },
+          "404" : {
+            "description" : "Profile not found."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      },
+      "post" : {
+        "description" : "Create a new profile.",
+        "operationId" : "createProfile",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "profile",
+          "description" : "The profile to create.",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Profile"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Successfully created the profile.",
+            "schema" : {
+              "$ref" : "#/definitions/Profile"
+            }
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      },
+      "put" : {
+        "description" : "Update an existing profile.",
+        "operationId" : "updateProfile",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "profile",
+          "description" : "The updated profile.",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/Profile"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated the profile.",
+            "schema" : {
+              "$ref" : "#/definitions/Profile"
+            }
+          },
+          "404" : {
+            "description" : "Profile not found."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    },
+    "/products" : {
+      "get" : {
+        "description" : "Get all products for the user.",
+        "operationId" : "getAllProducts",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "List of products.",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/Product"
+              }
+            }
+          },
+          "404" : {
+            "description" : "No products found for the user."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    },
+    "/products/{sku}" : {
+      "post" : {
+        "description" : "Buy the product specified in sku parameter.",
+        "operationId" : "buyProduct",
+        "produces" : [ "application/json", "text/plain" ],
+        "parameters" : [ {
+          "name" : "sku",
+          "in" : "path",
+          "description" : "SKU to be purchased",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Successfully purchased the product.",
+            "schema" : {
+              "$ref" : "#/definitions/Product"
+            }
+          },
+          "404" : {
+            "description" : "Product not found."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "auth0_jwt" : {
+      "type" : "oauth2",
+      "authorizationUrl" : "https://ostelco.eu.auth0.com/authorize",
+      "flow" : "implicit",
+      "x-google-issuer" : "https://ostelco.eu.auth0.com/",
+      "x-google-jwks_uri" : "https://ostelco.eu.auth0.com/.well-known/jwks.json",
+      "x-google-audiences" : "http://google_api"
+    }
+  },
+  "definitions" : {
+    "Profile" : {
+      "type" : "object",
+      "required" : [ "email" ],
+      "properties" : {
+        "name" : {
+          "type" : "string"
+        },
+        "address" : {
+          "type" : "string"
+        },
+        "postCode" : {
+          "type" : "string"
+        },
+        "city" : {
+          "type" : "string"
+        },
+        "email" : {
+          "type" : "string",
+          "format" : "email"
+        }
+      },
+      "example" : {
+        "address" : "address",
+        "city" : "city",
+        "name" : "name",
+        "postCode" : "postCode",
+        "email" : "email"
+      }
+    },
+    "Product" : {
+      "type" : "object",
+      "required" : [ "price", "sku" ],
+      "properties" : {
+        "sku" : {
+          "type" : "string",
+          "description" : "A unique Id representing a SKU"
+        },
+        "price" : {
+          "$ref" : "#/definitions/Currency"
+        }
+      },
+      "example" : {
+        "price" : {
+          "amount" : 0,
+          "code" : "code"
+        },
+        "sku" : "sku"
+      }
+    },
+    "Currency" : {
+      "type" : "object",
+      "required" : [ "amount", "code" ],
+      "properties" : {
+        "amount" : {
+          "type" : "integer",
+          "description" : "A positive integer in the smallest currency unit",
+          "minimum" : 0
+        },
+        "code" : {
+          "type" : "string",
+          "description" : "ISO 4217 currency code (three letter alphabetic code)"
+        }
+      },
+      "example" : {
+        "amount" : 0,
+        "code" : "code"
+      }
+    }
+  }
+}
