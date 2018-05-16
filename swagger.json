@@ -6,7 +6,7 @@
     "title" : "Ostelco API"
   },
   "host" : "api.ostelco.org",
-  "schemes" : [ "http", "https" ],
+  "schemes" : [ "https" ],
   "paths" : {
     "/profile" : {
       "get" : {
@@ -95,10 +95,7 @@
           "200" : {
             "description" : "List of products.",
             "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/Product"
-              }
+              "$ref" : "#/definitions/ProductList"
             }
           },
           "404" : {
@@ -131,6 +128,80 @@
           },
           "404" : {
             "description" : "Product not found."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    },
+    "/subscription" : {
+      "get" : {
+        "description" : "Get subscription status for the user (identified by bearer token).",
+        "operationId" : "getSubscription",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Get the subscription status for this user.",
+            "schema" : {
+              "$ref" : "#/definitions/SubscriptionStatus"
+            }
+          },
+          "404" : {
+            "description" : "No subscription found for this user."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    },
+    "/consents" : {
+      "get" : {
+        "description" : "Get all consents for the user.",
+        "operationId" : "getConsents",
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "List of consents.",
+            "schema" : {
+              "$ref" : "#/definitions/ConsentList"
+            }
+          },
+          "404" : {
+            "description" : "No consents found for the user."
+          }
+        },
+        "security" : [ {
+          "auth0_jwt" : [ ]
+        } ]
+      }
+    },
+    "/consents/{consent-id}" : {
+      "put" : {
+        "description" : "Change the value for the specified consent.",
+        "operationId" : "updateConsent",
+        "parameters" : [ {
+          "name" : "consent-id",
+          "in" : "path",
+          "description" : "Id of the consent to be changed",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "accepted",
+          "in" : "query",
+          "description" : "Whether user accepted the consent (default = true)",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully updated the consent."
+          },
+          "404" : {
+            "description" : "Consent not found."
           }
         },
         "security" : [ {
@@ -179,6 +250,44 @@
         "email" : "email"
       }
     },
+    "SubscriptionStatus" : {
+      "type" : "object",
+      "properties" : {
+        "remaining" : {
+          "type" : "integer",
+          "description" : "Remaining data"
+        },
+        "acceptedProducts" : {
+          "type" : "array",
+          "description" : "List of products",
+          "items" : {
+            "$ref" : "#/definitions/Product"
+          }
+        }
+      },
+      "example" : {
+        "acceptedProducts" : [ {
+          "price" : {
+            "amount" : 0,
+            "code" : "code"
+          },
+          "sku" : "sku"
+        }, {
+          "price" : {
+            "amount" : 0,
+            "code" : "code"
+          },
+          "sku" : "sku"
+        } ],
+        "remaining" : 0
+      }
+    },
+    "ProductList" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Product"
+      }
+    },
     "Product" : {
       "type" : "object",
       "required" : [ "price", "sku" ],
@@ -197,6 +306,29 @@
           "code" : "code"
         },
         "sku" : "sku"
+      }
+    },
+    "ConsentList" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Consent"
+      }
+    },
+    "Consent" : {
+      "type" : "object",
+      "properties" : {
+        "consentId" : {
+          "type" : "string",
+          "description" : "The identifier of the consent"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "A description of the consent"
+        },
+        "accepted" : {
+          "type" : "boolean",
+          "description" : "Whether user has accepted the consent or not"
+        }
       }
     },
     "Currency" : {
